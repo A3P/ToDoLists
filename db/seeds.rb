@@ -1,48 +1,27 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
-User.delete_all
+today = Date.today
+two_days_ago = Date.today - 2.days
+three_days_ago = Date.today - 3.days
+dates = [today, two_days_ago, three_days_ago]
 
-Profile.create! [
-	{gender: 'female', birth_year: 1954, first_name: 'Carly', last_name: 'Fiorina'},
-	{gender: 'male', birth_year: 1946, first_name: 'Donald', last_name: 'Trump'},
-	{gender: 'male', birth_year: 1951, first_name: 'Ben', last_name: 'Carson'},
-	{gender: 'female', birth_year: 1947, first_name: 'Hillary', last_name: 'Clinton'},
-]
+User.destroy_all
+TodoList.destroy_all
 
-Profile.all.each do |profile| 
-	user = User.create(username: profile.last_name, password_digest: "#{profile.first_name}#{profile.birth_year}")
-	profile.update(user_id: user.id)
+100.times { |index| TodoList.create! list_name: "List #{index}", list_due_date: dates.sample }
+
+TodoList.all.each do |list|
+  list.todo_items.create! [
+    { title: "Task 1", due_date: dates.sample, description: "very important task TEST", completed: false },
+    { title: "Task 2", due_date: dates.sample, description: "do something else TEST", completed: true},
+    { title: "Task 3", due_date: dates.sample, description: "learn Action Pack TEST", completed: true}
+  ]
 end
 
-users = User.all
-due_date = Date.today + 1.year
+users = User.create! [
+  { username: "jim", password: "abc123" },
+  { username: "rich", password: "123abc" }
+]
 
-users.each do |user|
-	list = user.todo_lists.create(list_name: "Just do it", list_due_date: due_date)
-
-	list.todo_items.create(
-		due_date: due_date, title: 'Clean Room',
-		description: 'or else mom will kill me', completed: false
-	)
-	list.todo_items.create(
-		due_date: due_date, title: 'Finish Homework',
-		description: 'or else teacher will kill me', completed: false
-	)
-	list.todo_items.create(
-		due_date: due_date, title: 'Take Shower',
-		description: 'or else girlfriend will kill me', completed: false
-	)
-	list.todo_items.create(
-		due_date: due_date, title: 'Feed Cat',
-		description: 'or else I will kill cat', completed: false
-	)
-	list.todo_items.create(
-		due_date: due_date, title: 'Replace IceCream',
-		description: 'or else sister will kill me', completed: false
-	)
+TodoList.all.each do |list|
+  list.user = users.sample
+  list.save!
 end
